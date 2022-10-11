@@ -26,7 +26,9 @@ export class PeopleService {
    */
   findAll = (): Observable<Person[] | void> =>
     of(this._people).pipe(
-      map((_: Person[]) => (!!_ && !!_.length ? _ : undefined)),
+      map((people: Person[]) =>
+        !!people && !!people.length ? people : undefined,
+      ),
     );
 
   /**
