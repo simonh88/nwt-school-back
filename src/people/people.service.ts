@@ -145,9 +145,17 @@ export class PeopleService {
    * @returns {Observable<void>}
    */
   delete = (id: string): Observable<void> =>
-    this._findPeopleIndexOfList(id).pipe(
-      tap((existingPeople: number) => this._people.splice(existingPeople, 1)),
-      map(() => undefined),
+    this._peopleDao.findByIdAndRemove(id).pipe(
+      catchError((e) =>
+        throwError(() => new UnprocessableEntityException(e.message)),
+      ),
+      mergeMap((personDeleted) =>
+        !!personDeleted
+          ? of(undefined)
+          : throwError(
+              () => new NotFoundException(`Person with id '${id}' not found`),
+            ),
+      ),
     );
 
   /**

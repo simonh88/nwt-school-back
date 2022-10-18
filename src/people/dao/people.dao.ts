@@ -65,4 +65,14 @@ export class PeopleDao {
         runValidators: true,
       }),
     );
+
+  /**
+   * Delete a person in people list
+   *
+   * @param {string} id
+   *
+   * @return {Observable<Person | void>}
+   */
+  findByIdAndRemove = (id: string): Observable<Person | void> =>
+    from(this._personModel.findByIdAndRemove(id));
 }
