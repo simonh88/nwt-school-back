@@ -101,7 +101,7 @@ export class Person {
     type: String,
     trim: true,
   })
-  manager: string;
+  manager?: string;
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

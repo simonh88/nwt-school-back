@@ -4,12 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { find, findIndex, from, Observable, of, throwError } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { defaultIfEmpty, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { PEOPLE } from '../data/people';
 import { Person } from './people.types';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { PersonEntity } from './entities/person.entity';
+import { PeopleDao } from './dao/people.dao';
 
 @Injectable()
 export class PeopleService {
@@ -18,8 +19,10 @@ export class PeopleService {
 
   /**
    * Class constructor
+   *
+   * @param {PeopleDao} _peopleDao instance of the DAO
    */
-  constructor() {
+  constructor(private readonly _peopleDao: PeopleDao) {
     this._people = [].concat(PEOPLE).map((person) => ({
       ...person,
       birthDate: this._parseDate(person.birthDate),
@@ -32,12 +35,10 @@ export class PeopleService {
    * @returns {Observable<PersonEntity[] | void>}
    */
   findAll = (): Observable<PersonEntity[] | void> =>
-    of(this._people).pipe(
-      map((people: Person[]) =>
-        !!people && !!people.length
-          ? people.map((person: Person) => new PersonEntity(person))
-          : undefined,
-      ),
+    this._peopleDao.find().pipe(
+      filter(Boolean),
+      map((people) => (people || []).map((person) => new PersonEntity(person))),
+      defaultIfEmpty(undefined),
     );
 
   /**
