@@ -142,6 +142,9 @@ export class PeopleController {
   @ApiConflictResponse({
     description: 'The person already exists in the database',
   })
+  @ApiUnprocessableEntityResponse({
+    description: "The request can't be performed in the database",
+  })
   @ApiBadRequestResponse({
     description: 'Parameter and/or payload provided are not good',
   })

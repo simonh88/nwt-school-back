@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { from, map, Observable } from 'rxjs';
 import { CreatePersonDto } from '../dto/create-person.dto';
+import { UpdatePersonDto } from '../dto/update-person.dto';
 import { PersonEntity } from '../entities/person.entity';
 import { Person } from '../schemas/person.schema';
 
@@ -45,4 +46,23 @@ export class PeopleDao {
    */
   save = (person: CreatePersonDto): Observable<Person> =>
     from(new this._personModel(person).save());
+
+  /**
+   * Update a person in people list
+   *
+   * @param {string} id
+   * @param {UpdatePersonDto} person
+   *
+   * @return {Observable<Person | void>}
+   */
+  findByIdAndUpdate = (
+    id: string,
+    person: UpdatePersonDto,
+  ): Observable<Person | void> =>
+    from(
+      this._personModel.findByIdAndUpdate(id, person, {
+        new: true,
+        runValidators: true,
+      }),
+    );
 }

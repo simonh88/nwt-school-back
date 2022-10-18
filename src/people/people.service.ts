@@ -117,27 +117,24 @@ export class PeopleService {
    * @returns {Observable<PersonEntity>}
    */
   update = (id: string, person: UpdatePersonDto): Observable<PersonEntity> =>
-    from(this._people).pipe(
-      find(
-        (existingPerson: Person) =>
-          existingPerson.lastname.toLowerCase() ===
-            person.lastname.toLowerCase() &&
-          existingPerson.firstname.toLowerCase() ===
-            person.firstname.toLowerCase() &&
-          existingPerson.id.toLowerCase() !== id.toLowerCase(),
-      ),
-      mergeMap((matchingPerson: Person) =>
-        !!matchingPerson
+    this._peopleDao.findByIdAndUpdate(id, person).pipe(
+      catchError((e) =>
+        e.code === 11000
           ? throwError(
               () =>
                 new ConflictException(
                   `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
                 ),
             )
-          : this._findPeopleIndexOfList(id),
+          : throwError(() => new UnprocessableEntityException(e.message)),
       ),
-      tap((index: number) => Object.assign(this._people[index], person)),
-      map((index: number) => new PersonEntity(this._people[index])),
+      mergeMap((personUpdated) =>
+        !!personUpdated
+          ? of(new PersonEntity(personUpdated))
+          : throwError(
+              () => new NotFoundException(`People with id '${id}' not found`),
+            ),
+      ),
     );
 
   /**
