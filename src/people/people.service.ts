@@ -2,9 +2,17 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { find, findIndex, from, Observable, of, throwError } from 'rxjs';
-import { defaultIfEmpty, filter, map, mergeMap, tap } from 'rxjs/operators';
+import {
+  catchError,
+  defaultIfEmpty,
+  filter,
+  map,
+  mergeMap,
+  tap,
+} from 'rxjs/operators';
 import { PEOPLE } from '../data/people';
 import { Person } from './people.types';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -47,10 +55,11 @@ export class PeopleService {
    * @returns {Observable<PersonEntity | void>}
    */
   findRandom = (): Observable<PersonEntity | void> =>
-    of(this._people[Math.round(Math.random() * this._people.length)]).pipe(
-      map((person: Person) =>
-        !!person ? new PersonEntity(person) : undefined,
-      ),
+    this._peopleDao.find().pipe(
+      filter((people) => !!people && !!people.length),
+      map((people) => people[Math.round(Math.random() * people.length)]),
+      map((people) => new PersonEntity(people)),
+      defaultIfEmpty(undefined),
     );
 
   /**
@@ -61,9 +70,11 @@ export class PeopleService {
    * @returns {Observable<PersonEntity>}
    */
   findOne = (id: string): Observable<PersonEntity> =>
-    from(this._people).pipe(
-      find((person: Person) => person.id === id),
-      mergeMap((person: Person) =>
+    this._peopleDao.findById(id).pipe(
+      catchError((e) =>
+        throwError(() => new UnprocessableEntityException(e.message)),
+      ),
+      mergeMap((person) =>
         !!person
           ? of(new PersonEntity(person))
           : throwError(

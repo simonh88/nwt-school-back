@@ -25,6 +25,7 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { HttpInterceptor } from '../interceptors/http.interceptor';
 
@@ -83,6 +84,9 @@ export class PeopleController {
   })
   @ApiNotFoundResponse({
     description: 'Person with the given "id" doesn\'t exist in the database',
+  })
+  @ApiUnprocessableEntityResponse({
+    description: "The request can't be performed in the database",
   })
   @ApiBadRequestResponse({ description: 'Parameter provided is not good' })
   @ApiParam({

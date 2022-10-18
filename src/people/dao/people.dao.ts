@@ -24,4 +24,14 @@ export class PeopleDao {
    */
   find = (): Observable<Person[]> =>
     from(this._personModel.find({})).pipe(map((people) => [].concat(people)));
+
+  /**
+   * Returns one person of the list matching id in parameter
+   *
+   * @param {string} id of the person in the db
+   *
+   * @return {Observable<Person | void>}
+   */
+  findById = (id: string): Observable<Person | void> =>
+    from(this._personModel.findById(id));
 }
