@@ -91,24 +91,21 @@ export class PeopleService {
    * @returns {Observable<PersonEntity>}
    */
   create = (person: CreatePersonDto): Observable<PersonEntity> =>
-    from(this._people).pipe(
-      find(
-        (personFound: Person) =>
-          personFound.lastname.toLowerCase() ===
-            person.lastname.toLowerCase() &&
-          personFound.firstname.toLowerCase() ===
-            person.firstname.toLowerCase(),
+    this._prepareNewPerson(person).pipe(
+      mergeMap((newPreparedPerson: CreatePersonDto) =>
+        this._peopleDao.save(newPreparedPerson),
       ),
-      mergeMap((personFound: Person) =>
-        !!personFound
+      catchError((e) =>
+        e.code === 11000
           ? throwError(
               () =>
                 new ConflictException(
                   `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
                 ),
             )
-          : this._addPerson(person),
+          : throwError(() => new UnprocessableEntityException(e.message)),
       ),
+      map((personCreated) => new PersonEntity(personCreated)),
     );
 
   /**
@@ -186,19 +183,14 @@ export class PeopleService {
    *
    * @private
    */
-  private _addPerson = (person: CreatePersonDto): Observable<PersonEntity> =>
+  private _prepareNewPerson = (
+    person: CreatePersonDto,
+  ): Observable<CreatePersonDto> =>
     of({
       ...person,
-      id: this._createId(),
       birthDate: this._parseDate('06/05/1985').toString(),
       photo: 'https://randomuser.me/api/portraits/lego/6.jpg',
-    } as Partial<Person>).pipe(
-      tap(
-        (createdPerson: Person) =>
-          (this._people = this._people.concat(createdPerson)),
-      ),
-      map((createdPerson: Person) => new PersonEntity(createdPerson)),
-    );
+    });
 
   /**
    * Function to parse date and return timestamp
@@ -213,13 +205,4 @@ export class PeopleService {
     const dates = date.split('/');
     return new Date(dates[2] + '/' + dates[1] + '/' + dates[0]).getTime();
   };
-
-  /**
-   * Creates a new id
-   *
-   * @returns {string}
-   *
-   * @private
-   */
-  private _createId = (): string => `${new Date().getTime()}`;
 }

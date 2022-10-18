@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { from, map, Observable } from 'rxjs';
+import { CreatePersonDto } from '../dto/create-person.dto';
 import { PersonEntity } from '../entities/person.entity';
 import { Person } from '../schemas/person.schema';
 
@@ -34,4 +35,14 @@ export class PeopleDao {
    */
   findById = (id: string): Observable<Person | void> =>
     from(this._personModel.findById(id));
+
+  /**
+   * Check if person already exists with index and add it in people list
+   *
+   * @param {CreatePersonDto} person to create
+   *
+   * @return {Observable<Person>}
+   */
+  save = (person: CreatePersonDto): Observable<Person> =>
+    from(new this._personModel(person).save());
 }

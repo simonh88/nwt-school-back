@@ -110,3 +110,5 @@ export class Person {
 }
 
 export const PersonSchema = SchemaFactory.createForClass(Person);
+
+PersonSchema.index({ firstname: 1, lastname: 1 }, { unique: true });
