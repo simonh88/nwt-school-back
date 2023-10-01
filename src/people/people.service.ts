@@ -31,8 +31,8 @@ export class PeopleService {
    */
   findAll = (): Observable<Person[] | void> =>
     of(this._people).pipe(
-      map((person: Person[]) =>
-        !!person && !!person.length ? person : undefined,
+      map((people: Person[]) =>
+        !!people && !!people.length ? people : undefined,
       ),
     );
 
@@ -43,7 +43,7 @@ export class PeopleService {
    */
   findRandom = (): Observable<Person | void> =>
     of(this._people[Math.round(Math.random() * this._people.length)]).pipe(
-      map((_: Person) => (!!_ ? _ : undefined)),
+      map((person: Person) => (!!person ? person : undefined)),
     );
 
   /**
@@ -55,10 +55,10 @@ export class PeopleService {
    */
   findOne = (id: string): Observable<Person> =>
     from(this._people).pipe(
-      find((_: Person) => _.id === id),
-      mergeMap((_: Person) =>
-        !!_
-          ? of(_)
+      find((person: Person) => person.id === id),
+      mergeMap((person: Person) =>
+        !!person
+          ? of(person)
           : throwError(
               () => new NotFoundException(`People with id '${id}' not found`),
             ),
