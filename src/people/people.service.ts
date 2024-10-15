@@ -159,6 +159,26 @@ export class PeopleService {
       map((index: number) => this._people[index]),
     );
 
+  updateWithoutArrowAndObs(id: string, person: UpdatePersonDto): Person {
+    const matchingPerson = this._people.find(
+      (existingPerson) =>
+        existingPerson.lastname.toLowerCase() ===
+          person.lastname.toLowerCase() &&
+        existingPerson.firstname.toLowerCase() ===
+          person.firstname.toLowerCase() &&
+        existingPerson.id.toLowerCase() !== id.toLowerCase(),
+    );
+    if (!!matchingPerson) {
+      throw new ConflictException(
+        `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
+      );
+    }
+    const indexToUpdate = this._findPeopleIndexOfListWithoutArrowAndObs(id);
+    Object.assign(this._people[indexToUpdate], person);
+
+    return this._people[indexToUpdate];
+  }
+
   /**
    * Finds index of array for current person
    *
@@ -179,6 +199,14 @@ export class PeopleService {
             ),
       ),
     );
+
+  private _findPeopleIndexOfListWithoutArrowAndObs(id: string): number {
+    const index = this._people.findIndex((person) => person.id === id);
+    if (index <= -1) {
+      throw new NotFoundException(`People with id '${id}' not found`);
+    }
+    return index;
+  }
 
   /**
    * Add person with good data in people list
