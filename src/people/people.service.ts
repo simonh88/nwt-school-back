@@ -192,6 +192,11 @@ export class PeopleService {
       map(() => undefined),
     );
 
+  deleteWithoutArrowAndObs(id: string): void {
+    const indexToDelete = this._findPeopleIndexOfListWithoutArrowAndObs(id);
+    this._people.splice(indexToDelete, 1);
+  }
+
   /**
    * Finds index of array for current person
    *
