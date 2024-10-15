@@ -31,6 +31,13 @@ export class PeopleService {
       ),
     );
 
+  findAllIterative = (): Person[] =>
+    !!this._people && this._people.length ? this._people : undefined;
+
+  findAllWithoutArrowFunc(): Person[] {
+    return !!this._people && this._people.length ? this._people : undefined;
+  }
+
   /**
    * Function to parse date and return timestamp
    *
