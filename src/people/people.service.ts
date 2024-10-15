@@ -37,6 +37,10 @@ export class PeopleService {
       ),
     );
 
+  findAllWithoutArrowAndObs(): Person[] | void {
+    return !!this._people && !!this._people.length ? this._people : undefined;
+  }
+
   /**
    * Returns randomly one person of the list
    *
@@ -46,6 +50,12 @@ export class PeopleService {
     of(this._people[Math.round(Math.random() * this._people.length)]).pipe(
       map((person: Person) => (!!person ? person : undefined)),
     );
+
+  findRandomWithoutArrowAndObs(): Person | void {
+    const randomPerson =
+      this._people[Math.round(Math.random() * this._people.length)];
+    return !!randomPerson ? randomPerson : undefined;
+  }
 
   /**
    * Returns one person of the list matching id in parameter
@@ -65,6 +75,15 @@ export class PeopleService {
             ),
       ),
     );
+
+  findOneWithoutArrowAndObs(id: string): Person {
+    const person = this._people.find((person) => person.id === id);
+    if (!person) {
+      throw new NotFoundException(`People with id '${id}' not found`);
+    }
+
+    return person;
+  }
 
   /**
    * Check if person already exists and add it in people list
@@ -94,6 +113,20 @@ export class PeopleService {
       ),
     );
 
+  createWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personAlreadyExists = this._people.find(
+      (personFound) =>
+        personFound.lastname.toLowerCase() === person.lastname.toLowerCase() &&
+        personFound.firstname.toLowerCase() === person.firstname.toLowerCase(),
+    );
+
+    if (!!personAlreadyExists) {
+      throw new ConflictException(
+        `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
+      );
+    }
+    return this._addPersonWithoutArrowAndObs(person);
+  }
   /**
    * Update a person in people list
    *
@@ -168,6 +201,19 @@ export class PeopleService {
           (this._people = this._people.concat(createdPerson)),
       ),
     );
+
+  _addPersonWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personToAdd: Person = {
+      ...person,
+      id: this._createId(),
+      birthDate: this._parseDate('06/05/1985').toString(),
+      photo: 'https://randomuser.me/api/portraits/lego/6.jpg',
+    };
+
+    this._people = this._people.concat(personToAdd);
+
+    return personToAdd;
+  }
 
   /**
    * Function to parse date and return timestamp
