@@ -31,6 +31,10 @@ export class PeopleService {
       ),
     );
 
+  findAllWithoutArrowAndObs(): Person[] | void {
+    return !!this._people && !!this._people.length ? this._people : undefined;
+  }
+
   /**
    * Returns randomly one person of the list
    *
@@ -40,6 +44,12 @@ export class PeopleService {
     of(this._people[Math.round(Math.random() * this._people.length)]).pipe(
       map((person: Person) => (!!person ? person : undefined)),
     );
+
+  findRandomWithoutArrowAndObs(): Person | void {
+    const randomPerson =
+      this._people[Math.round(Math.random() * this._people.length)];
+    return !!randomPerson ? randomPerson : undefined;
+  }
 
   /**
    * Returns one person of the list matching id in parameter
@@ -59,6 +69,15 @@ export class PeopleService {
             ),
       ),
     );
+
+  findOneWithoutArrowAndObs(id: string): Person {
+    const person = this._people.find((person) => person.id === id);
+    if (!person) {
+      throw new NotFoundException(`People with id '${id}' not found`);
+    }
+
+    return person;
+  }
 
   /**
    * Function to parse date and return timestamp
