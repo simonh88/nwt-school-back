@@ -112,6 +112,20 @@ export class PeopleService {
       ),
     );
 
+  createWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personAlreadyExists = this._people.find(
+      (personFound) =>
+        personFound.lastname.toLowerCase() === person.lastname.toLowerCase() &&
+        personFound.firstname.toLowerCase() === person.firstname.toLowerCase(),
+    );
+
+    if (!!personAlreadyExists) {
+      throw new ConflictException(
+        `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
+      );
+    }
+    return this._addPersonWithoutArrowAndObs(person);
+  }
   /**
    * Add person with good data in people list
    *
@@ -133,6 +147,19 @@ export class PeopleService {
           (this._people = this._people.concat(createdPerson)),
       ),
     );
+
+  _addPersonWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personToAdd: Person = {
+      ...person,
+      id: this._createId(),
+      birthDate: this._parseDate('06/05/1985').toString(),
+      photo: 'https://randomuser.me/api/portraits/lego/6.jpg',
+    };
+
+    this._people = this._people.concat(personToAdd);
+
+    return personToAdd;
+  }
 
   /**
    * Function to parse date and return timestamp
