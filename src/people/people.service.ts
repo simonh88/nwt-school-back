@@ -40,6 +40,12 @@ export class PeopleService {
       ),
     );
 
+  findAllWithoutArrowAndObs(): Person[] | void {
+    return !!this._people && !!this._people.length
+      ? this._people.map((person) => new PersonEntity(person))
+      : undefined;
+  }
+
   /**
    * Returns randomly one person of the list
    *
@@ -51,6 +57,12 @@ export class PeopleService {
         !!person ? new PersonEntity(person) : undefined,
       ),
     );
+
+  findRandomWithoutArrowAndObs(): Person | void {
+    const randomPerson =
+      this._people[Math.round(Math.random() * this._people.length)];
+    return !!randomPerson ? new PersonEntity(randomPerson) : undefined;
+  }
 
   /**
    * Returns one person of the list matching id in parameter
@@ -70,6 +82,15 @@ export class PeopleService {
             ),
       ),
     );
+
+  findOneWithoutArrowAndObs(id: string): Person {
+    const person = this._people.find((person) => person.id === id);
+    if (!person) {
+      throw new NotFoundException(`People with id '${id}' not found`);
+    }
+
+    return new PersonEntity(person);
+  }
 
   /**
    * Check if person already exists and add it in people list
@@ -99,6 +120,20 @@ export class PeopleService {
       ),
     );
 
+  createWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personAlreadyExists = this._people.find(
+      (personFound) =>
+        personFound.lastname.toLowerCase() === person.lastname.toLowerCase() &&
+        personFound.firstname.toLowerCase() === person.firstname.toLowerCase(),
+    );
+
+    if (!!personAlreadyExists) {
+      throw new ConflictException(
+        `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
+      );
+    }
+    return this._addPersonWithoutArrowAndObs(person);
+  }
   /**
    * Update a person in people list
    *
@@ -131,6 +166,26 @@ export class PeopleService {
       map((index: number) => new PersonEntity(this._people[index])),
     );
 
+  updateWithoutArrowAndObs(id: string, person: UpdatePersonDto): Person {
+    const matchingPerson = this._people.find(
+      (existingPerson) =>
+        existingPerson.lastname.toLowerCase() ===
+          person.lastname.toLowerCase() &&
+        existingPerson.firstname.toLowerCase() ===
+          person.firstname.toLowerCase() &&
+        existingPerson.id.toLowerCase() !== id.toLowerCase(),
+    );
+    if (!!matchingPerson) {
+      throw new ConflictException(
+        `People with lastname '${person.lastname}' and firstname '${person.firstname}' already exists`,
+      );
+    }
+    const indexToUpdate = this._findPeopleIndexOfListWithoutArrowAndObs(id);
+    Object.assign(this._people[indexToUpdate], person);
+
+    return new PersonEntity(this._people[indexToUpdate]);
+  }
+
   /**
    * Deletes one person in people list
    *
@@ -143,6 +198,11 @@ export class PeopleService {
       tap((existingPeople: number) => this._people.splice(existingPeople, 1)),
       map(() => undefined),
     );
+
+  deleteWithoutArrowAndObs(id: string): void {
+    const indexToDelete = this._findPeopleIndexOfListWithoutArrowAndObs(id);
+    this._people.splice(indexToDelete, 1);
+  }
 
   /**
    * Finds index of array for current person
@@ -164,6 +224,14 @@ export class PeopleService {
             ),
       ),
     );
+
+  private _findPeopleIndexOfListWithoutArrowAndObs(id: string): number {
+    const index = this._people.findIndex((person) => person.id === id);
+    if (index <= -1) {
+      throw new NotFoundException(`People with id '${id}' not found`);
+    }
+    return index;
+  }
 
   /**
    * Add person with good data in people list
@@ -187,6 +255,19 @@ export class PeopleService {
       ),
       map((createdPerson: Person) => new PersonEntity(createdPerson)),
     );
+
+  _addPersonWithoutArrowAndObs(person: CreatePersonDto): Person {
+    const personToAdd: Person = {
+      ...person,
+      id: this._createId(),
+      birthDate: this._parseDate('06/05/1985').toString(),
+      photo: 'https://randomuser.me/api/portraits/lego/6.jpg',
+    };
+
+    this._people = this._people.concat(personToAdd);
+
+    return new PersonEntity(personToAdd);
+  }
 
   /**
    * Function to parse date and return timestamp
