@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { from, map, Observable } from 'rxjs';
-import { PersonEntity } from '../entities/person.entity';
 import { Person } from '../schemas/person.schema';
 
 @Injectable()
@@ -25,6 +24,11 @@ export class PeopleDao {
   find = (): Observable<Person[]> =>
     from(this._personModel.find({})).pipe(map((people) => [].concat(people)));
 
+  findWithoutArrowAndObs(): Person[] {
+    const people = this._personModel.find();
+    return [].concat(people);
+  }
+
   /**
    * Returns one person of the list matching id in parameter
    *
@@ -34,4 +38,8 @@ export class PeopleDao {
    */
   findById = (id: string): Observable<Person | void> =>
     from(this._personModel.findById(id));
+
+  async findByIdWithoutArrowAndObs(id: string): Promise<Person> {
+    return this._personModel.findById(id).exec();
+  }
 }
