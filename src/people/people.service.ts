@@ -42,8 +42,9 @@ export class PeopleService {
     );
 
   findAllWithoutArrowAndObs(): Person[] | void {
-    return !!this._people && !!this._people.length
-      ? this._people.map((person) => new PersonEntity(person))
+    const people = this._peopleDao.findWithoutArrowAndObs();
+    return !!people && !!people.length
+      ? people.map((person) => new PersonEntity(person))
       : undefined;
   }
 

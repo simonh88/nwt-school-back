@@ -24,4 +24,9 @@ export class PeopleDao {
    */
   find = (): Observable<Person[]> =>
     from(this._personModel.find({})).pipe(map((people) => [].concat(people)));
+
+  findWithoutArrowAndObs(): Person[] {
+    const people = this._personModel.find();
+    return [].concat(people);
+  }
 }
