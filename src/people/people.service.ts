@@ -41,7 +41,9 @@ export class PeopleService {
     );
 
   findAllWithoutArrowAndObs(): Person[] | void {
-    return !!this._people && !!this._people.length ? this._people : undefined;
+    return !!this._people && !!this._people.length
+      ? this._people.map((person) => new PersonEntity(person))
+      : undefined;
   }
 
   /**
@@ -59,7 +61,7 @@ export class PeopleService {
   findRandomWithoutArrowAndObs(): Person | void {
     const randomPerson =
       this._people[Math.round(Math.random() * this._people.length)];
-    return !!randomPerson ? randomPerson : undefined;
+    return !!randomPerson ? new PersonEntity(randomPerson) : undefined;
   }
 
   /**
@@ -87,7 +89,7 @@ export class PeopleService {
       throw new NotFoundException(`People with id '${id}' not found`);
     }
 
-    return person;
+    return new PersonEntity(person);
   }
 
   /**
@@ -181,7 +183,7 @@ export class PeopleService {
     const indexToUpdate = this._findPeopleIndexOfListWithoutArrowAndObs(id);
     Object.assign(this._people[indexToUpdate], person);
 
-    return this._people[indexToUpdate];
+    return new PersonEntity(this._people[indexToUpdate]);
   }
 
   /**
@@ -264,7 +266,7 @@ export class PeopleService {
 
     this._people = this._people.concat(personToAdd);
 
-    return personToAdd;
+    return new PersonEntity(personToAdd);
   }
 
   /**
